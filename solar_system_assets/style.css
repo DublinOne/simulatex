@@ -1,0 +1,254 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Solar System Container */
+.solarsystem {
+  position: relative;
+  width: 90vmin;
+  height: 90vmin;
+  margin: auto;
+  list-style: none;
+  transform-style: preserve-3d;
+  animation: rotate 120s infinite linear;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Sun */
+.sun {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, yellow, orange);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  box-shadow: 0 0 40px 10px rgba(255, 204, 0, 0.6);
+}
+
+/* Planet Orbits */
+.solarsystem li {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Mercury */
+.mercury {
+  width: 100px;
+  height: 100px;
+}
+.mercury a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: #b5b5b5;
+  border-radius: 50%;
+  transform-origin: center 50px;
+  animation: orbit 10s infinite linear;
+}
+
+/* Venus */
+.venus {
+  width: 150px;
+  height: 150px;
+}
+.venus a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  background: #e39e1c;
+  border-radius: 50%;
+  transform-origin: center 75px;
+  animation: orbit 18s infinite linear;
+}
+
+/* Earth */
+.earth {
+  width: 200px;
+  height: 200px;
+}
+.earth a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: #3f8cff;
+  border-radius: 50%;
+  transform-origin: center 100px;
+  animation: orbit 30s infinite linear;
+}
+
+/* Mars */
+.mars {
+  width: 250px;
+  height: 250px;
+}
+.mars a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: #ff5733;
+  border-radius: 50%;
+  transform-origin: center 125px;
+  animation: orbit 50s infinite linear;
+}
+
+/* Jupiter */
+.jupiter {
+  width: 350px;
+  height: 350px;
+}
+.jupiter a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  background: #d8ca9d;
+  border-radius: 50%;
+  transform-origin: center 175px;
+  animation: orbit 120s infinite linear;
+}
+
+/* Saturn */
+.saturn {
+  width: 420px;
+  height: 420px;
+}
+.saturn a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  background: #e3e0c0;
+  border-radius: 50%;
+  transform-origin: center 210px;
+  animation: orbit 240s infinite linear;
+}
+.saturn .ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 10px;
+  background: #ccc;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotateX(75deg);
+  z-index: -1;
+}
+
+/* Uranus */
+.uranus {
+  width: 480px;
+  height: 480px;
+}
+.uranus a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  background: #b5e3e3;
+  border-radius: 50%;
+  transform-origin: center 240px;
+  animation: orbit 480s infinite linear;
+}
+
+/* Neptune */
+.neptune {
+  width: 540px;
+  height: 540px;
+}
+.neptune a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  background: #3b5bdb;
+  border-radius: 50%;
+  transform-origin: center 270px;
+  animation: orbit 900s infinite linear;
+}
+
+/* Pluto */
+.pluto {
+  width: 600px;
+  height: 600px;
+}
+.pluto a {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: #aaa;
+  border-radius: 50%;
+  transform-origin: center 300px;
+  animation: orbit 1400s infinite linear;
+}
+
+/* Orbit Animation */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(100%) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(100%) rotate(-360deg);
+  }
+}
+
+/* Descriptions */
+#descriptions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  max-height: 30vh;
+  overflow-y: auto;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+#descriptions h2 {
+  margin-top: 0;
+}

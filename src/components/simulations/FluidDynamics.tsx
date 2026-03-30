@@ -4,9 +4,17 @@ interface FluidDynamicsProps {
   isPlaying: boolean
   density?: number
   viscosity?: number
+  particleCount?: number
+  colorMode?: 'default' | 'electric' | 'fire' | 'ocean'
 }
 
-export function FluidDynamics({ isPlaying, density = 0.1, viscosity = 0.01 }: FluidDynamicsProps) {
+export function FluidDynamics({ 
+  isPlaying, 
+  density = 0.1, 
+  viscosity = 0.01, 
+  particleCount = 2000,
+  colorMode = 'default'
+}: FluidDynamicsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [mouse, setMouse] = useState({ x: 0, y: 0, down: false })
 
@@ -18,7 +26,7 @@ export function FluidDynamics({ isPlaying, density = 0.1, viscosity = 0.01 }: Fl
 
     let animationFrameId: number
     const particles: Particle[] = []
-    const numParticles = 2000
+    const numParticles = particleCount
     const width = canvas.width = canvas.offsetWidth
     const height = canvas.height = canvas.offsetHeight
 
@@ -36,7 +44,13 @@ export function FluidDynamics({ isPlaying, density = 0.1, viscosity = 0.01 }: Fl
         this.vx = (Math.random() - 0.5) * 2
         this.vy = (Math.random() - 0.5) * 2
         this.size = Math.random() * 2 + 1
-        this.color = `hsla(${200 + Math.random() * 40}, 100%, 50%, ${Math.random() * 0.5 + 0.2})`
+        
+        let hue = 200 + Math.random() * 40
+        if (colorMode === 'electric') hue = 50 + Math.random() * 20
+        if (colorMode === 'fire') hue = 10 + Math.random() * 30
+        if (colorMode === 'ocean') hue = 180 + Math.random() * 60
+        
+        this.color = `hsla(${hue}, 100%, 50%, ${Math.random() * 0.5 + 0.2})`
       }
 
       update(mouseX: number, mouseY: number, isMouseDown: boolean) {
@@ -46,8 +60,8 @@ export function FluidDynamics({ isPlaying, density = 0.1, viscosity = 0.01 }: Fl
           const distance = Math.sqrt(dx * dx + dy * dy)
           if (distance < 200) {
             const force = (200 - distance) / 200
-            this.vx += (dx / distance) * force * 0.5
-            this.vy += (dy / distance) * force * 0.5
+            this.vx += (dx / distance) * force * 0.8
+            this.vy += (dy / distance) * force * 0.8
           }
         }
 
@@ -95,7 +109,7 @@ export function FluidDynamics({ isPlaying, density = 0.1, viscosity = 0.01 }: Fl
     return () => {
       cancelAnimationFrame(animationFrameId)
     }
-  }, [isPlaying, mouse, viscosity])
+  }, [isPlaying, mouse, viscosity, particleCount, colorMode])
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = canvasRef.current?.getBoundingClientRect()

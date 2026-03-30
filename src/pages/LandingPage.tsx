@@ -30,9 +30,12 @@ export function LandingPage() {
               <Play className="ml-2 w-5 h-5 fill-current" />
             </Button>
           </Link>
-          <Button variant="outline" size="lg" className="h-14 px-8 text-lg font-medium glass">
-            View Gallery
-          </Button>
+          <Link to="/pricing">
+            <Button variant="outline" size="lg" className="h-14 px-8 text-lg font-medium glass text-primary border-primary/20">
+              <Sparkles className="mr-2 w-5 h-5 fill-current" />
+              Go Pro
+            </Button>
+          </Link>
         </div>
       </div>
       

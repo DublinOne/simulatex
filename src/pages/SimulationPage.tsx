@@ -29,22 +29,29 @@ import {
   Zap,
   Cpu,
   Save,
-  Trash2
+  Trash2,
+  Lock,
+  Sparkles
 } from 'lucide-react'
 import { SolarSystem } from '../components/simulations/SolarSystem'
 import { FluidDynamics } from '../components/simulations/FluidDynamics'
 import { blink } from '../blink/client'
 import { useAuth } from '../hooks/useAuth'
+import { useSubscription } from '../hooks/useSubscription'
 import { cn } from '../lib/utils'
 
 export function SimulationPage() {
   const { id } = useParams({ from: '/simulations/$id' })
   const { user } = useAuth()
+  const { isPro } = useSubscription()
   const [isPlaying, setIsPlaying] = useState(true)
   const [speed, setSpeed] = useState([1])
   const [showOrbits, setShowOrbits] = useState(true)
   const [showLabels, setShowLabels] = useState(true)
   const [viscosity, setViscosity] = useState([0.01])
+  const [isTrueScale, setIsTrueScale] = useState(false)
+  const [particleCount, setParticleCount] = useState([2000])
+  const [colorMode, setColorMode] = useState<'default' | 'electric' | 'fire' | 'ocean'>('default')
   const [isSaving, setIsSaving] = useState(false)
 
   // Load saved configuration
@@ -60,6 +67,9 @@ export function SimulationPage() {
           if (config.showOrbits !== undefined) setShowOrbits(config.showOrbits)
           if (config.showLabels !== undefined) setShowLabels(config.showLabels)
           if (config.viscosity) setViscosity([config.viscosity])
+          if (config.isTrueScale !== undefined && isPro) setIsTrueScale(config.isTrueScale)
+          if (config.particleCount && isPro) setParticleCount([config.particleCount])
+          if (config.colorMode && isPro) setColorMode(config.colorMode)
           toast.success('Configuration loaded')
         }
       } catch (error) {
@@ -68,7 +78,7 @@ export function SimulationPage() {
     }
 
     loadConfig()
-  }, [id, user])
+  }, [id, user, isPro])
 
   const handleSave = async () => {
     if (!user) {
@@ -82,7 +92,10 @@ export function SimulationPage() {
         speed: speed[0],
         showOrbits,
         showLabels,
-        viscosity: viscosity[0]
+        viscosity: viscosity[0],
+        isTrueScale: isPro ? isTrueScale : false,
+        particleCount: isPro ? particleCount[0] : 2000,
+        colorMode: isPro ? colorMode : 'default'
       })
 
       await blink.db.simulations.upsert({
@@ -111,6 +124,7 @@ export function SimulationPage() {
           speed={speed[0]} 
           showOrbits={showOrbits} 
           showLabels={showLabels} 
+          isTrueScale={isPro ? isTrueScale : false}
         />
       )
     }
@@ -119,6 +133,8 @@ export function SimulationPage() {
         <FluidDynamics 
           isPlaying={isPlaying} 
           viscosity={viscosity[0]} 
+          particleCount={isPro ? particleCount[0] : 2000}
+          colorMode={isPro ? colorMode : 'default'}
         />
       )
     }
@@ -153,11 +169,11 @@ export function SimulationPage() {
           
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 px-4 py-2 glass-card rounded-full text-[10px] font-bold tracking-widest uppercase text-white/70">
-              <Cpu className="w-3.5 h-3.5 text-primary" />
-              <span>GPU: {id === 'solar-system' ? '14%' : '42%'}</span>
+              <Cpu className={cn("w-3.5 h-3.5", isPro ? "text-primary" : "text-white/30")} />
+              <span>GPU Cluster: {isPro ? 'PRIORITY' : 'STANDARD'}</span>
               <span className="mx-2 w-px h-3 bg-white/10" />
               <Zap className="w-3.5 h-3.5 text-accent" />
-              <span>FPS: 60</span>
+              <span>LOAD: {id === 'solar-system' ? '14%' : '42%'}</span>
             </div>
             
             <div className="flex items-center gap-2">
@@ -262,6 +278,22 @@ export function SimulationPage() {
                       </div>
                       <Switch checked={showLabels} onCheckedChange={setShowLabels} className="data-[state=checked]:bg-primary" />
                     </div>
+
+                    <div className={cn("flex items-center justify-between transition-opacity", !isPro && "opacity-50 cursor-not-allowed")}>
+                      <div className="space-y-0.5">
+                        <Label className="text-xs font-bold text-white/90 flex items-center gap-1.5">
+                          Actual Distances
+                          {!isPro && <Badge className="bg-white/5 border-white/10 text-[8px] h-4 py-0 px-1">PRO</Badge>}
+                        </Label>
+                        <p className="text-[10px] text-white/40">Scale orbits to realistic proportions</p>
+                      </div>
+                      <Switch 
+                        checked={isTrueScale} 
+                        onCheckedChange={(val) => isPro ? setIsTrueScale(val) : toast.error('Upgrade to Pro for actual distances')} 
+                        disabled={!isPro}
+                        className="data-[state=checked]:bg-primary" 
+                      />
+                    </div>
                   </>
                 ) : (
                   <div className="space-y-4">
@@ -278,19 +310,85 @@ export function SimulationPage() {
                         className="[&>[role=slider]]:h-3 [&>[role=slider]]:w-3"
                       />
                     </div>
+
+                    {isPro && (
+                      <>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs font-bold text-white/90">Particle Density</Label>
+                            <span className="text-[10px] text-primary">{particleCount[0]}</span>
+                          </div>
+                          <Slider 
+                            value={particleCount} 
+                            onValueChange={setParticleCount} 
+                            min={1000}
+                            max={10000} 
+                            step={500} 
+                            className="[&>[role=slider]]:h-3 [&>[role=slider]]:w-3"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-xs font-bold text-white/90 flex items-center gap-1.5">
+                            Spectral Mode
+                          </Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {(['default', 'electric', 'fire', 'ocean'] as const).map((mode) => (
+                              <Button
+                                key={mode}
+                                variant={colorMode === mode ? 'default' : 'outline'}
+                                size="sm"
+                                className="text-[10px] h-7 font-bold uppercase tracking-wider glass border-white/5"
+                                onClick={() => setColorMode(mode)}
+                              >
+                                {mode}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
                 
-                <div className="flex items-center justify-between opacity-50 cursor-not-allowed">
+                <div className={cn("flex items-center justify-between", !isPro && "opacity-50")}>
                   <div className="space-y-0.5">
                     <Label className="text-xs font-bold text-white/90 flex items-center gap-1.5">
                       Real-time Scale
-                      <Badge className="bg-white/5 border-white/10 text-[8px] h-4 py-0 px-1">PRO</Badge>
+                      {!isPro && <Badge className="bg-white/5 border-white/10 text-[8px] h-4 py-0 px-1">PRO</Badge>}
                     </Label>
                     <p className="text-[10px] text-white/40">Scale objects to true size</p>
                   </div>
-                  <Switch checked={false} disabled />
+                  <div className="flex items-center gap-2">
+                    {!isPro && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Link to="/pricing">
+                              <Lock className="w-3.5 h-3.5 text-primary/50 hover:text-primary transition-colors" />
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent>Upgrade to Pro to unlock astronomical scale</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    <Switch 
+                      checked={isTrueScale} 
+                      onCheckedChange={setIsTrueScale} 
+                      disabled={!isPro}
+                      className="data-[state=checked]:bg-primary" 
+                    />
+                  </div>
                 </div>
+
+                {!isPro && (
+                  <Link to="/pricing">
+                    <Button variant="outline" className="w-full h-10 glass border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-bold text-xs gap-2">
+                      <Sparkles className="w-3.5 h-3.5 fill-current" />
+                      Upgrade to unlock Pro Parameters
+                    </Button>
+                  </Link>
+                )}
               </div>
             </Card>
             

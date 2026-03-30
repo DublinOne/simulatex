@@ -42,8 +42,11 @@ import {
   Waves,
   Activity,
   Cpu,
-  Database
+  Database,
+  Sparkles,
+  CreditCard
 } from 'lucide-react'
+import { useSubscription } from '../hooks/useSubscription'
 
 const MOCK_SIMULATIONS = [
   {
@@ -93,6 +96,8 @@ const USAGE_DATA = [
 ]
 
 export function DashboardPage() {
+  const { subscriptionStatus, isPro } = useSubscription()
+
   return (
     <AppShell>
       <AppShellSidebar>
@@ -111,6 +116,25 @@ export function DashboardPage() {
               <SidebarItem icon={<Activity className="w-4 h-4" />} label="Analytics" href="/analytics" />
               <SidebarItem icon={<History className="w-4 h-4" />} label="History" href="/history" />
             </SidebarGroup>
+
+            <SidebarGroup className="mt-auto pb-6">
+              {!isPro ? (
+                <Link to="/pricing">
+                  <SidebarItem 
+                    icon={<Sparkles className="w-4 h-4 text-primary fill-current" />} 
+                    label="Upgrade to Pro" 
+                    className="bg-primary/5 hover:bg-primary/10 border border-primary/10 mx-4 rounded-xl text-primary font-bold"
+                  />
+                </Link>
+              ) : (
+                <SidebarItem 
+                  icon={<CreditCard className="w-4 h-4" />} 
+                  label="Manage Billing" 
+                  onClick={() => window.open('/api/stripe/portal', '_blank')}
+                  className="mx-4 rounded-xl"
+                />
+              )}
+            </SidebarGroup>
           </SidebarContent>
         </Sidebar>
       </AppShellSidebar>
@@ -124,21 +148,62 @@ export function DashboardPage() {
         <Page className="max-w-7xl mx-auto p-6 md:p-10">
           <PageHeader className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-1">
-              <PageTitle className="text-4xl font-heading font-bold text-white tracking-tight">System Overview</PageTitle>
+              <div className="flex items-center gap-3">
+                <PageTitle className="text-4xl font-heading font-bold text-white tracking-tight">System Overview</PageTitle>
+                {isPro && (
+                  <Badge className="bg-primary/20 border-primary/20 text-primary py-0 px-2 h-6 font-bold tracking-widest uppercase text-[10px]">
+                    Pro Account
+                  </Badge>
+                )}
+              </div>
               <PageDescription className="text-muted-foreground text-lg">Real-time telemetry and predictive simulation metrics.</PageDescription>
             </div>
-            <Button size="lg" className="h-12 px-6 font-medium shadow-[0_0_15px_rgba(var(--primary),0.2)]">
-              <Plus className="mr-2 w-4 h-4" />
-              New Simulation
-            </Button>
+            <div className="flex gap-4">
+              {!isPro && (
+                <Link to="/pricing">
+                  <Button variant="outline" size="lg" className="h-12 px-6 font-bold glass text-primary border-primary/20 hover:bg-primary/5">
+                    <Sparkles className="mr-2 w-4 h-4 fill-current" />
+                    Go Pro
+                  </Button>
+                </Link>
+              )}
+              <Button size="lg" className="h-12 px-6 font-medium shadow-[0_0_15px_rgba(var(--primary),0.2)]">
+                <Plus className="mr-2 w-4 h-4" />
+                New Simulation
+              </Button>
+            </div>
           </PageHeader>
           
           <PageBody className="space-y-10">
+            {!isPro && (
+              <Card className="glass-card border-primary/10 bg-primary/5 p-8 relative overflow-hidden group hover:bg-primary/[0.07] transition-all duration-300">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                  <div className="space-y-2">
+                    <h2 className="text-2xl font-heading font-bold text-white flex items-center gap-2">
+                      <Sparkles className="w-6 h-6 text-primary fill-current animate-pulse" />
+                      Scale your simulations to infinity.
+                    </h2>
+                    <p className="text-muted-foreground max-w-lg">
+                      Unlock high-fidelity physics engines, true astronomical scale, and priority computational resources with a SimulateX Pro subscription.
+                    </p>
+                  </div>
+                  <Link to="/pricing">
+                    <Button size="lg" className="h-14 px-10 font-bold bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_rgba(var(--primary),0.3)] shrink-0">
+                      Explore Pro Tiers
+                    </Button>
+                  </Link>
+                </div>
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Zap className="w-48 h-48 text-primary" />
+                </div>
+              </Card>
+            )}
+
             <StatGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Stat label="Total Simulations" value="12" icon={<Orbit className="text-primary w-5 h-5" />} className="glass-card p-6" />
-              <Stat label="CPU Load" value="24%" trend={-4.2} trendLabel="vs last hour" icon={<Cpu className="text-accent w-5 h-5" />} className="glass-card p-6" />
-              <Stat label="Mem Usage" value="14.2 GB" trend={1.5} trendLabel="vs last hour" icon={<Database className="text-blue-400 w-5 h-5" />} className="glass-card p-6" />
-              <Stat label="Uptime" value="99.9%" icon={<Activity className="text-green-400 w-5 h-5" />} className="glass-card p-6" />
+              <Stat label="Active Jobs" value="12" icon={<Orbit className="text-primary w-5 h-5" />} className="glass-card p-6" />
+              <Stat label="Queue Wait" value="0.2s" trend={isPro ? -95 : 0} trendLabel={isPro ? "Priority" : "Standard"} icon={<Zap className="text-accent w-5 h-5" />} className="glass-card p-6" />
+              <Stat label="Node Efficiency" value="94%" trend={5.2} trendLabel="vs avg" icon={<Activity className="text-blue-400 w-5 h-5" />} className="glass-card p-6" />
+              <Stat label="Estimated End" value="14:20" icon={<History className="text-green-400 w-5 h-5" />} className="glass-card p-6" />
             </StatGroup>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

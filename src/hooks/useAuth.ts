@@ -14,8 +14,11 @@ export function useAuth() {
     return unsubscribe
   }, [])
 
+  const plan = user?.metadata ? (JSON.parse(user.metadata).plan || 'free') : 'free'
+  const isPro = plan === 'pro'
+
   const login = () => blink.auth.login()
   const logout = () => blink.auth.logout()
 
-  return { user, isLoading, isAuthenticated: !!user, login, logout }
+  return { user, isLoading, isAuthenticated: !!user, plan, isPro, login, logout }
 }

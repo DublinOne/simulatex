@@ -10,6 +10,7 @@ import { Toaster } from '@blinkdotnew/ui'
 import { LandingPage } from './pages/LandingPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { SimulationPage } from './pages/SimulationPage'
+import { PricingPage } from './pages/PricingPage'
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -32,6 +33,12 @@ const dashboardRoute = createRoute({
   component: DashboardPage,
 })
 
+const pricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/pricing',
+  component: PricingPage,
+})
+
 const simulationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/simulations/$id',
@@ -41,6 +48,7 @@ const simulationRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute, 
   dashboardRoute, 
+  pricingRoute,
   simulationRoute
 ])
 
